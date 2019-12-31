@@ -2,10 +2,12 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
+using IdentityServer4;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 
 namespace IdentityServer
 {
@@ -31,6 +33,31 @@ namespace IdentityServer
 
             // not recommended for production - you need to store your key material somewhere secure
             builder.AddDeveloperSigningCredential();
+
+            services.AddAuthentication()
+            .AddGoogle("Google", options =>
+            {
+                options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+                options.ClientId = "448832310229-cd23f2bh45eijne91b1vivt983l9org6.apps.googleusercontent.com";
+                options.ClientSecret = "dttRxVHjtmy0d0UIDG2-ZQIG";
+            })
+            .AddOpenIdConnect("oidc", "Demo IdentityServer", options =>
+            {
+                options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+                options.SignOutScheme = IdentityServerConstants.SignoutScheme;
+                options.SaveTokens = true;
+
+                options.Authority = "https://demo.identityserver.io/";
+                options.ClientId = "native.code";
+                options.ClientSecret = "secret";
+                options.ResponseType = "code";
+
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    NameClaimType = "name",
+                    RoleClaimType = "role"
+                };
+            });
         }
 
         public void Configure(IApplicationBuilder app)
