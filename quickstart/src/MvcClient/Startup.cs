@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using System.IdentityModel.Tokens.Jwt;
+using System.Threading.Tasks;
 
 namespace MvcClient
 {
@@ -33,6 +35,15 @@ namespace MvcClient
 
                 options.Scope.Add("api1");
                 options.Scope.Add("offline_access");
+
+                options.Events.OnRedirectToIdentityProvider = context =>
+                {
+                    if (context.ProtocolMessage.RequestType == OpenIdConnectRequestType.Authentication)
+                    {
+                        context.ProtocolMessage.AcrValues = "tenant:TEST_TENANT_001";
+                    }
+                    return Task.FromResult(0);
+                };
             });
         }
 
